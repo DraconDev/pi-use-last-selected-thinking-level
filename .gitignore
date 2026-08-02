@@ -1,0 +1,8 @@
+node_modules/
+dist/
+build/
+*.log
+.DS_Store
+
+# local pi harness state (never published)
+.pi-glla/

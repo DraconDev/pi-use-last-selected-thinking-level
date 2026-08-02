@@ -1,0 +1,44 @@
+{
+	"name": "pi-use-last-selected-thinking-level",
+	"version": "0.1.0",
+	"description": "Remember the thinking level you last used per model and re-apply it when you switch back — without overriding settings pins.",
+	"type": "module",
+	"main": "index.ts",
+	"files": ["index.ts", "README.md", "LICENSE"],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/DraconDev/pi-use-last-selected-thinking-level"
+	},
+	"homepage": "https://github.com/DraconDev/pi-use-last-selected-thinking-level",
+	"bugs": {
+		"url": "https://github.com/DraconDev/pi-use-last-selected-thinking-level/issues"
+	},
+	"keywords": [
+		"pi",
+		"pi-package",
+		"pi-extension",
+		"extension",
+		"thinking",
+		"thinking-level",
+		"reasoning",
+		"model",
+		"memory"
+	],
+	"author": {
+		"name": "DraconDev"
+	},
+	"license": "MIT",
+	"peerDependencies": {
+		"@earendil-works/pi-coding-agent": "*"
+	},
+	"pi": {
+		"extensions": [
+			"./index.ts"
+		]
+	},
+	"scripts": {
+		"clean": "echo 'nothing to clean'",
+		"build": "echo 'Pi loads index.ts directly; no build step'",
+		"check": "bunx tsc --noEmit -p tsconfig.json"
+	}
+}
