@@ -20,11 +20,17 @@ import { getAgentDir } from "@earendil-works/pi-coding-agent";
 //
 //   - thinking_level_select records the effective level for the active model,
 //     and the outgoing model's level when a switch changed it.
-//   - model_select re-applies the remembered level for the incoming model.
+//   - model_select re-applies the remembered level for the incoming model, and
+//     ENFORCES settings pins: pi only applies pinned levels at startup and when
+//     tab-cycling models — selecting via the picker or `/model` goes through
+//     setModel(), which inherits the current session level and never consults
+//     the scoped entry's pinned level. So for a pinned model this extension
+//     checks the level after the switch and lifts it to the pin if pi didn't.
 //   - session start (startup / new) re-applies the remembered level for the
 //     active model; resume/fork keep the session's own stored level.
-//   - Settings pins always win: a model pinned via enabledModels keeps its
-//     pinned level; its memory stays dormant until the pin is removed.
+//   - Settings pins always win: a model pinned via enabledModels runs at its
+//     pinned level (enforced here on selection); its memory stays dormant
+//     until the pin is removed.
 //
 // State persists in ~/.pi/agent/thinking-memory.json.
 //
@@ -162,13 +168,31 @@ export default function (pi: ExtensionAPI) {
 		remember(current, event.level);
 	});
 
-	// Re-apply the incoming model's remembered level on user-initiated switches.
-	// Pinned models are skipped: settings pins always win.
+	// Re-apply the incoming model's pinned or remembered level on user-initiated
+	// switches. Pinned models are NOT skipped: pi only applies pins at startup
+	// and when tab-cycling, so selecting a pinned model via the picker or
+	// `/model` (which go through setModel) can leave it at the inherited session
+	// level. Enforce the pin here when pi didn't apply it.
 	pi.on("model_select", async (event, ctx) => {
 		const key = modelKey(event.model);
 		lastModelKey = key;
 		if (!key || event.source === "restore") return;
-		if (isPinned(ctx, key)) return;
+		const pinned = ctx.scopedModels.find(
+			(scoped) => scoped.thinkingLevel !== undefined && modelKey(scoped.model) === key,
+		);
+		const pinnedLevel = pinned?.thinkingLevel;
+		if (pinnedLevel !== undefined) {
+			if (pi.getThinkingLevel() !== pinnedLevel) {
+				pi.setThinkingLevel(pinnedLevel);
+				const applied = pi.getThinkingLevel();
+				const label =
+					applied === pinnedLevel
+						? `Applied pinned thinking level '${applied}' to ${key}`
+						: `Pinned thinking level '${pinnedLevel}' clamped to '${applied}' for ${key}`;
+				ctx.ui.notify(label, "info");
+			}
+			return;
+		}
 		applyRemembered(pi, ctx, key, true);
 	});
 

@@ -1,6 +1,6 @@
 {
 	"name": "pi-use-last-selected-thinking-level",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Remember the thinking level you last used per model and re-apply it when you switch back — without overriding settings pins.",
 	"type": "module",
 	"main": "index.ts",
