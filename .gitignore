@@ -26,7 +26,6 @@ build/
 *.jsonl
 *.kra
 *.kra~
-*.log
 *.sqlite
 *.sqlite3
 .DS_Store
